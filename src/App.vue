@@ -159,6 +159,7 @@ import refactorTable from './components/refactor_table'
 // import * as echarts from 'echarts'
 import showCharts from '@/api/echart.js'
 import request from '@/api/request.js'
+import { Loading } from 'element-ui'
 
 export default {
   name: 'App',
@@ -210,8 +211,10 @@ export default {
     },
     getBusi() {
       const data = JSON.stringify({ 'time_class': 'total', 'county_name': '修水', 'buzi_class': '总计' })
+      const loadinginstace = Loading.service({ text: '正在加载中' })
       request(data, 'score_group_var.php')
         .then(response => {
+          loadinginstace.close()
           const data = response.data.data
           const title = response.data.title
           for (var i of data) {
