@@ -156,7 +156,9 @@ import axios from 'axios'
 import Title from './components/title'
 import refactorTable from './components/refactor_table'
 // import qs from 'qs'
-import * as echarts from 'echarts'
+// import * as echarts from 'echarts'
+import showCharts from '@/api/echart.js'
+import request from '@/api/request.js'
 
 export default {
   name: 'App',
@@ -184,8 +186,8 @@ export default {
     this.getpkData()
   },
   mounted() {
-    this.getTime()
     this.showCharts()
+    this.getTime()
   },
   methods: {
     // tableOperateHandle(row,type){
@@ -200,40 +202,15 @@ export default {
     },
     getDataList() {
       const data = JSON.stringify({ 'time_class': 'total', 'county_name': '修水', 'phone': '13979282121' })
-      // console.log(data);
-      const config = {
-        method: 'post',
-        url: 'http://112.35.56.85:8888/xs/reporter/score_single.php',
-        // dataType: 'json',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        data: data
-      }
-      // let params =JSON.stringify({time_class:'total',county_name:'修水',phone:'13979282121'});
-      // console.log(this.$qs.parse({'time_class':'total','county_name':'修水','phone':'13979282121'}));
-      axios(config)
-        .then(response => {
-          console.log(response)
-          this.mockdata = response.data
-        })
-        .catch(error => {
-          console.log(error)
-        })
+      request(data, 'score_single.php').then(res => {
+        this.mockdata = res.data
+      }).catch(error => {
+        console.log(error)
+      })
     },
     getBusi() {
       const data = JSON.stringify({ 'time_class': 'total', 'county_name': '修水', 'buzi_class': '总计' })
-      // console.log(data);
-      const config = {
-        method: 'post',
-        url: 'http://112.35.56.85:8888/xs/reporter/score_group_var.php',
-        // dataType: 'json',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        data: data
-      }
-      axios(config)
+      request(data, 'score_group_var.php')
         .then(response => {
           const data = response.data.data
           const title = response.data.title
@@ -253,38 +230,11 @@ export default {
           }
           this.tableColumns2[0].fixed = 'fixed'
           this.tableColumns2[0].width = '100'
-          // for(let j = 0; j < title.length; j++){
-          //   if(j == 0){
-          //       this.tableColumns2.push({
-          //       prop: 'aim',
-          //       fixed: 'fixed',
-          //       label: title[j],
-          //       align: 'center',
-          //       width: '100'
-          //   });
-          //   }else{
-          //       this.tableColumns2.push({
-          //       prop: 'county',
-          //       label: title[j],
-          //       align: 'center'
-          //   });
-          //   }
-          // }
         })
     },
     getpkData() {
       const data = JSON.stringify({ 'time_class': 'total', 'county_name': '修水', 'buzi_class': '宽带' })
-      // console.log(data);
-      const config = {
-        method: 'post',
-        url: 'http://112.35.56.85:8888/xs/reporter/score_pk_var.php',
-        // dataType: 'json',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        data: data
-      }
-      axios(config)
+      request(data, 'score_pk_var.php')
         .then(response => {
           const data = response.data.data
           const title = response.data.title
@@ -314,116 +264,7 @@ export default {
       this.currentTime = time.getHours() + ':00:00'
     },
     showCharts() {
-      const option = {
-        tooltip: {
-          trigger: 'axis'
-        },
-        legend: {
-          data: ['今日', '昨日'],
-          icon: 'circle',
-          itemWidth: 20, // 设置宽度
-          itemHeight: 12, // 设置高度
-          right: '3%',
-          top: '5%',
-          textStyle: { color: '#666' }
-        },
-        grid: {
-          left: '4%',
-          right: '4%',
-          bottom: '10%',
-          containLabel: true
-        },
-        xAxis: {
-          type: 'category',
-          axisTick: {
-            alignWithLabel: true
-          },
-          boundaryGap: false,
-          data: ['05时', '08时', '11时', '14时', '17时', '20时'],
-          axisLine: {
-            lineStyle: {
-              color: '#333'
-            }
-          }
-        },
-        yAxis: [
-          {
-            name: '数量',
-            type: 'value',
-            splitLine: {
-              show: true,
-              lineStyle: {
-                color: ['#ccc'],
-                width: 1,
-                type: 'dotted'
-              }
-            },
-            axisLine: {
-              lineStyle: {
-                color: '#666'
-              }
-            }
-          },
-          {
-            type: 'value',
-            splitLine: {
-              show: false
-            },
-            axisLine: {
-              lineStyle: {
-                color: '#666'
-              }
-            }
-          }
-        ],
-        dataZoom: [
-          {
-            type: 'slider',
-            show: true,
-            height: 18,
-            bottom: 5,
-            start: 10,
-            end: 90 // 初始化滚动条
-          }
-        ],
-        series: [
-          {
-            name: '昨日',
-            type: 'line',
-            stack: '总量',
-            smooth: true,
-            color: ['#FF7F0B'],
-            yAxisIndex: 1,
-            data: [120, 132, 101, 134, 90, 230, 210],
-            itemStyle: {
-              normal: {
-                lineStyle: {
-                  width: 2,
-                  type: 'dotted' // 'dotted'虚线 'solid'实线
-                }
-              }
-            }
-          },
-          {
-            name: '今日',
-            type: 'line',
-            stack: '总量',
-            smooth: true,
-            color: ['#0BCF95'],
-            yAxisIndex: 0,
-            data: [220, 182, 191, 234, 290, 530, 510]
-          }
-        ]
-      }
-      const myChart = echarts.init(
-        this.$refs.showLine
-        // document.getElementById('showLine')
-      )
-      // 绘制图表
-      myChart.setOption(option, true)
-      window.addEventListener('resize', () => {
-        myChart.resize()
-      })
+      showCharts()
     }
   }
 }
